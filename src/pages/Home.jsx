@@ -1,12 +1,9 @@
-import React from 'react'
-
-const Home = () => {
+export default function Home() {
     return (
-        <div>
-            <h1 className="text-2xl font-bold mb-4">Welcome to the Home Page</h1>
-            <p>This is the home page of the application.</p>
+        <div className="min-h-screen flex items-center justify-center">
+            <h1 className="text-4xl font-bold drop-shadow-lg">
+                Welcome to Pro-Crud 🎉
+            </h1>
         </div>
-    )
+    );
 }
-
-export default Home

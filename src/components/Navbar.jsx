@@ -28,8 +28,8 @@ export default function Navbar({ darkMode, setDarkMode }) {
                                 <Link to="/" className="hover:underline">
                                     Home
                                 </Link>
-                                <Link to="/students" className="hover:underline">
-                                    Students
+                                <Link to="/Products" className="hover:underline">
+                                    Products
                                 </Link>
                             </div>
 
@@ -119,12 +119,12 @@ export default function Navbar({ darkMode, setDarkMode }) {
                             Home
                         </Link>
                         <Link
-                            to="/students"
+                            to="/Products"
                             onClick={() => setIsOpen(false)}
                             className={`py-2 px-2 rounded transition ${darkMode ? "hover:bg-white/10" : "hover:bg-gray-100"
                                 }`}
                         >
-                            Students
+                            Products
                         </Link>
                     </nav>
                 </aside>

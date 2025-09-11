@@ -1,8 +1,22 @@
-export default function Products() {
+import { useEffect, useState } from "react";
+import Card from "../components/Card";
+
+
+export default function Products({ darkMode }) {
+    const [cards, setCards] = useState([]);
+
+    useEffect(() => {
+        fetch("http://localhost:5001/cards")
+            .then(res => res.json())
+            .then(data => setCards(data))
+            .catch(err => console.error("Fetch error:", err));
+    }, []);
+
     return (
-        <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors">
-            <h1 className="text-3xl font-bold">Products</h1>
-            <p className="mt-2">Manage all products here.</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-6">
+            {cards.map(card => (
+                <Card key={card.id} imgSrc={card.img} alt={card.alt} darkMode={darkMode} />
+            ))}
         </div>
     );
 }

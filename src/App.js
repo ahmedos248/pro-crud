@@ -31,7 +31,7 @@ export default function App() {
         <main className="p-4 py-24">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/products" element={<Products />} />
+            <Route path="/products" element={<Products darkMode={darkMode} />} />
           </Routes>
         </main>
       </div>

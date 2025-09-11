@@ -85,26 +85,29 @@ export default function Card({ imgSrc, alt, darkMode }) {
                 transition={{ type: "spring", stiffness: 150, damping: 20 }}
                 className="overflow-hidden"
             >
-                <div className="p-4 flex flex-col gap-3">
-                    <div className="flex justify-between">
-                        <button className="bg-red-500 text-white px-3 py-1 rounded">Delete</button>
-                        <button className="bg-blue-500 text-white px-3 py-1 rounded">View</button>
+                <div className="p-2 sm:p-4 flex flex-col gap-2 sm:gap-3 text-xs sm:text-sm">
+                    <div className="flex justify-between gap-2 w-full">
+                        <button className="bg-red-500 text-white px-2 py-1 rounded text-base sm:text-sm md:text-sm md:px-1 md:py-0.5">Delete</button>
+                        <button className="bg-blue-500 text-white px-2 py-1 rounded text-base sm:text-sm md:text-sm md:px-1 md:py-0.5">View</button>
                     </div>
 
-                    <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-2">
-                            <button onClick={decreasePrice} className="px-2 py-1 bg-gray-600 rounded">-</button>
-                            <span>Price: ${price}</span>
-                            <button onClick={increasePrice} className="px-2 py-1 bg-gray-600 rounded">+</button>
+                    <div className="flex justify-between items-center gap-2 w-full">
+                        <div className="flex items-center gap-2 md:gap-1">
+                            <button onClick={decreasePrice} className="py-1 bg-gray-600 rounded text-base sm:text-sm px-[5px] md:py-0.5 md:text-sm">-</button>
+                            <span className="text-base sm:text-sm md:text-xs">Price: ${price}</span>
+                            <button onClick={increasePrice} className="py-1 bg-gray-600 rounded text-base sm:text-sm px-[3px] md:py-0.5 md:text-sm">+</button>
                         </div>
 
-                        <div className="flex items-center gap-2">
-                            <button onClick={decreaseQuantity} className="px-2 py-1 bg-gray-600 rounded">-</button>
-                            <span>Qty: {quantity}</span>
-                            <button onClick={increaseQuantity} className="px-2 py-1 bg-gray-600 rounded">+</button>
+                        <div className="flex items-center gap-2 md:gap-1">
+                            <button onClick={decreaseQuantity} className="py-1 bg-gray-600 rounded text-base sm:text-sm px-[5px] md:py-0.5 md:text-sm">-</button>
+                            <span className={`px-2 py-1 rounded-2xl text-base sm:text-sm md:px-1 md:py-0.5 md:text-sm ${quantity === 0 ? 'bg-red-600' : 'bg-green-600'}`}>
+                                Qty: {quantity}
+                            </span>
+                            <button onClick={increaseQuantity} className="py-1 bg-gray-600 rounded text-base sm:text-sm px-[3px] md:py-0.5 md:text-sm">+</button>
                         </div>
                     </div>
                 </div>
+
             </motion.div>
         </motion.div>
 

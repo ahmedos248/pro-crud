@@ -13,9 +13,11 @@ export default function Products({ darkMode }) {
     }, []);
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-6 auto-rows-min">
             {cards.map(card => (
-                <Card key={card.id} imgSrc={card.img} alt={card.alt} darkMode={darkMode} />
+                <div key={card.id} className="flex-none">
+                    <Card imgSrc={card.img} alt={card.alt} darkMode={darkMode} />
+                </div>
             ))}
         </div>
     );

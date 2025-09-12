@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Navbar from "./components/Navbar";
@@ -6,13 +6,21 @@ import { colorPalette } from "./utils/colorPalette";
 import Products from "./pages/Products";
 import BackgroundTexture from "./ui/BackgroundTexture";
 
-
 export default function App() {
   const [darkMode, setDarkMode] = useState(false);
 
+  // ⬇️ Sync Tailwind dark mode class with state
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [darkMode]);
+
   return (
     <div className="relative min-h-screen">
-      {/* Gradient background */}
+      {/* Gradient background (custom colorPalette) */}
       <div
         className={`absolute inset-0 -z-20 transition-colors duration-500 
           ${darkMode ? colorPalette.dark.gradient : colorPalette.light.gradient}`}

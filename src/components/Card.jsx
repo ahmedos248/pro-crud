@@ -92,18 +92,18 @@ export default function Card({ imgSrc, alt, darkMode }) {
                     </div>
 
                     <div className="flex justify-between items-center gap-2 w-full">
-                        <div className="flex items-center gap-2 md:gap-1">
-                            <button onClick={decreasePrice} className="py-1 bg-gray-600 rounded text-base sm:text-sm px-[5px] md:py-0.5 md:text-sm">-</button>
+                        <div className="flex items-center text-center gap-2 md:gap-[1px]">
+                            <button onClick={decreasePrice} className="py-1 dark:bg-gray-600 bg-slate-300 rounded text-base sm:text-sm px-[5px] md:py-0.5 md:text-sm">-</button>
                             <span className="text-base sm:text-sm md:text-xs">Price: ${price}</span>
-                            <button onClick={increasePrice} className="py-1 bg-gray-600 rounded text-base sm:text-sm px-[3px] md:py-0.5 md:text-sm">+</button>
+                            <button onClick={increasePrice} className="py-1 dark:bg-gray-600 bg-slate-300 rounded text-base sm:text-sm px-[3px] md:py-0.5 md:text-sm">+</button>
                         </div>
 
                         <div className="flex items-center gap-2 md:gap-1">
-                            <button onClick={decreaseQuantity} className="py-1 bg-gray-600 rounded text-base sm:text-sm px-[5px] md:py-0.5 md:text-sm">-</button>
-                            <span className={`px-2 py-1 rounded-2xl text-base sm:text-sm md:px-1 md:py-0.5 md:text-sm ${quantity === 0 ? 'bg-red-600' : 'bg-green-600'}`}>
+                            <button onClick={decreaseQuantity} className="py-1 dark:bg-gray-600 bg-slate-300 rounded text-base sm:text-sm px-[5px] md:py-0.5 md:text-sm">-</button>
+                            <span className={`px-2 py-1 rounded-2xl text-base sm:text-sm md:px-1 md:py-0.5 md:text-xs ${quantity === 0 ? 'bg-red-600' : 'bg-green-600'}`}>
                                 Qty: {quantity}
                             </span>
-                            <button onClick={increaseQuantity} className="py-1 bg-gray-600 rounded text-base sm:text-sm px-[3px] md:py-0.5 md:text-sm">+</button>
+                            <button onClick={increaseQuantity} className="py-1 dark:bg-gray-600 bg-slate-300 rounded text-base sm:text-sm px-[3px] md:py-0.5 md:text-sm">+</button>
                         </div>
                     </div>
                 </div>

@@ -1,12 +1,13 @@
 import { motion, useAnimation } from "framer-motion";
 import { useState } from "react";
 
-export default function Card({ imgSrc, alt, darkMode }) {
+export default function Card({ imgSrc, alt, darkMode, initialPrice, initialQuantity }) {
     const controls = useAnimation();
     const [isHover, setIsHover] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
-    const [price, setPrice] = useState(100);
-    const [quantity, setQuantity] = useState(1);
+    const [price, setPrice] = useState(initialPrice ?? 100);
+    const [quantity, setQuantity] = useState(initialQuantity ?? 1);
+
 
     const handleHoverStart = () => {
         setIsHover(true);

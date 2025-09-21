@@ -13,10 +13,10 @@ export function useProducts() {
                 );
                 const data = await res.json();
 
-                const validProducts = [];
-                for (const item of data) {
+                // Create validation promises for all items
+                const validationPromises = data.map(async (item) => {
                     const url = item.images?.[0];
-                    if (!url || !url.startsWith("http")) continue;
+                    if (!url || !url.startsWith("http") || !item.title?.trim()) return null;
 
                     const isValid = await new Promise((resolve) => {
                         const img = new Image();
@@ -25,15 +25,13 @@ export function useProducts() {
                         img.onerror = () => resolve(false);
                     });
 
-                    if (isValid && item.title?.trim()) {
-                        validProducts.push({
-                            id: item.id,
-                            img: url,
-                            alt: item.title,
-                            price: item.price,
-                        });
-                    }
-                }
+                    return isValid
+                        ? { id: item.id, img: url, alt: item.title, price: item.price }
+                        : null;
+                });
+
+                // Wait for all validations to finish
+                const validProducts = (await Promise.all(validationPromises)).filter(Boolean);
 
                 setCards(validProducts);
             } catch (err) {

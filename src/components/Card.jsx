@@ -2,6 +2,9 @@ import { motion, useAnimation } from "framer-motion";
 import { useState } from "react";
 
 export default function Card({ imgSrc, alt, darkMode, initialPrice, initialQuantity }) {
+    const [src, setSrc] = useState(
+        imgSrc && imgSrc.startsWith("http") ? imgSrc : "/fallback.png"
+    );
     const controls = useAnimation();
     const [isHover, setIsHover] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
@@ -54,8 +57,10 @@ export default function Card({ imgSrc, alt, darkMode, initialPrice, initialQuant
                 style={{ perspective: 600 }}
             >
                 <img
-                    src={imgSrc}
-                    alt={alt}
+                    src={src}
+                    alt={alt || "Product"}
+                    loading="lazy"
+                    onError={() => setSrc("/fallback.png")}
                     className="w-full h-full object-cover rounded-xl"
                 />
 

@@ -31,6 +31,9 @@ export default function Navbar({ darkMode, setDarkMode }) {
                                 <Link to="/Products" className="hover:underline">
                                     Products
                                 </Link>
+                                <Link to="/learn-more" className="hover:underline">
+                                    Learn More
+                                </Link>
                             </div>
 
                             {/* Right actions */}
@@ -125,6 +128,14 @@ export default function Navbar({ darkMode, setDarkMode }) {
                                 }`}
                         >
                             Products
+                        </Link>
+                        <Link
+                            to="/learn-more"
+                            onClick={() => setIsOpen(false)}
+                            className={`py-2 px-2 rounded transition ${darkMode ? "hover:bg-white/10" : "hover:bg-gray-100"
+                                }`}
+                        >
+                            Learn More
                         </Link>
                     </nav>
                 </aside>

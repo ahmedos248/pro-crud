@@ -13,27 +13,17 @@ export function useProducts() {
                 );
                 const data = await res.json();
 
-                // Create validation promises for all items
-                const validationPromises = data.map(async (item) => {
-                    const url = item.images?.[0];
-                    if (!url || !url.startsWith("http") || !item.title?.trim()) return null;
+                // Map products directly (no pre-validation)
+                const products = data
+                    .filter((item) => item.title?.trim() && item.images?.[0])
+                    .map((item) => ({
+                        id: item.id,
+                        img: item.images[0],
+                        alt: item.title,
+                        price: item.price,
+                    }));
 
-                    const isValid = await new Promise((resolve) => {
-                        const img = new Image();
-                        img.src = url;
-                        img.onload = () => resolve(true);
-                        img.onerror = () => resolve(false);
-                    });
-
-                    return isValid
-                        ? { id: item.id, img: url, alt: item.title, price: item.price }
-                        : null;
-                });
-
-                // Wait for all validations to finish
-                const validProducts = (await Promise.all(validationPromises)).filter(Boolean);
-
-                setCards(validProducts);
+                setCards(products);
             } catch (err) {
                 console.error("Fetch error:", err);
             } finally {

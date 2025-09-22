@@ -5,6 +5,7 @@ import Navbar from "./components/Navbar";
 import { colorPalette } from "./utils/colorPalette";
 import Products from "./pages/Products";
 import BackgroundTexture from "./ui/BackgroundTexture";
+import LearnMore from "./pages/LearnMore";
 
 export default function App() {
   const [darkMode, setDarkMode] = useState(false);
@@ -40,6 +41,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/products" element={<Products darkMode={darkMode} />} />
+            <Route path="/learn-more" element={<LearnMore />} />
           </Routes>
         </main>
       </div>

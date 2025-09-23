@@ -14,6 +14,7 @@ export default function Products({ darkMode }) {
     const visibleCards = cards?.slice(startIndex, startIndex + cardsPerPage);
 
     const handleAdd = (product) => setCards((prev) => [product, ...prev]);
+    const handleDelete = (id) => setCards((prev) => prev.filter((c) => c.id !== id));
 
     return (
         <div className="p-6 space-y-6">
@@ -30,6 +31,8 @@ export default function Products({ darkMode }) {
                                 darkMode={darkMode}
                                 initialPrice={card.price}
                                 initialQuantity={1}
+                                id={card.id}
+                                onDelete={handleDelete}
                             />
                         </div>
                     ))}

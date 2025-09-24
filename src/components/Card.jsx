@@ -124,6 +124,7 @@ const prefetchItem = () => {
       >
         <div className="p-2 sm:p-4 flex flex-col gap-2 sm:gap-3 text-xs sm:text-sm">
           <div className="flex justify-between gap-2 w-full flex-col ">
+          <div className="flex justify-between gap-2 w-full flex-col ">
          
         
             <button className="bg-blue-500 text-white px-2 py-1 rounded text-base sm:text-sm md:text-sm md:px-1 md:py-0.5">

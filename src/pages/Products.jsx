@@ -3,27 +3,42 @@ import { useProducts } from "../hooks/useProducts";
 import { useResponsiveCards } from "../hooks/useResponsiveCards";
 import { useState } from "react";
 import AddProductForm from "../components/AddProductForm";
+import { useAddProduct } from "../hooks/useAddProduct";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Products({ darkMode }) {
-    const { cards, setCards, loading } = useProducts();
+    const { data: cards = [], isLoading } = useProducts();
     const cardsPerPage = useResponsiveCards();
     const [currentPage, setCurrentPage] = useState(1);
 
-    const totalPages = Math.ceil(cards?.length / cardsPerPage);
-    const startIndex = (currentPage - 1) * cardsPerPage;
-    const visibleCards = cards?.slice(startIndex, startIndex + cardsPerPage);
+    const queryClient = useQueryClient();
+    const addMutation = useAddProduct();
 
-    const handleAdd = (product) => setCards((prev) => [product, ...prev]);
-    const handleDelete = (id) => setCards((prev) => prev.filter((c) => c.id !== id));
+    const totalPages = Math.ceil(cards.length / cardsPerPage);
+    const startIndex = (currentPage - 1) * cardsPerPage;
+    const visibleCards = cards.slice(startIndex, startIndex + cardsPerPage);
+
+    const handleAdd = (product) => addMutation.mutate(product);
+
+    const handleDelete = (id) => {
+        queryClient.setQueryData(["products"], (old = []) =>
+            old.filter((c) => c.id !== id)
+        );
+
+        // also remove from localStorage
+        const localProducts = JSON.parse(localStorage.getItem("addedProducts")) || [];
+        const updatedLocal = localProducts.filter((p) => p.id !== id);
+        localStorage.setItem("addedProducts", JSON.stringify(updatedLocal));
+    };
 
     return (
         <div className="p-6 space-y-6">
-            <AddProductForm onAdd={handleAdd} />
-            {loading ? (
+            <AddProductForm addProduct={handleAdd} />
+            {isLoading ? (
                 <div className="text-center py-20">Loading products...</div>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {visibleCards?.map((card) => (
+                    {visibleCards.map((card) => (
                         <div key={card.id} className="flex-none">
                             <Card
                                 imgSrc={card.img || "https://via.placeholder.com/300"}

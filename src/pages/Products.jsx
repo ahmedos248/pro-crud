@@ -4,14 +4,6 @@ import { useResponsiveCards } from "../hooks/useResponsiveCards";
 import { useState } from "react";
 import AddProductForm from "../components/AddProductForm";
 
-const removeLocal = (id) => {
-  try {
-    const list = JSON.parse(localStorage.getItem("nb_local_products") || "[]")
-      .filter(x => String(x.id) !== String(id));
-    localStorage.setItem("nb_local_products", JSON.stringify(list));
-    localStorage.removeItem(`nb_product_${id}`);
-  } catch {}
-};
 export default function Products({ darkMode }) {
     const { cards, setCards, loading } = useProducts();
     const cardsPerPage = useResponsiveCards();
@@ -36,7 +28,12 @@ export default function Products({ darkMode }) {
                     {visibleCards?.map((card) => (
                         <div key={card.id} className="flex-none">
                             <Card
-                                imgSrc={card.img || "https://via.placeholder.com/300"}
+                                imgSrc={
+  card.img ||
+   card.image ||
+ (Array.isArray(card.images) ? card.images[0] : "") ||
+   card.thumbnail ||+   "https://via.placeholder.com/300"
+ }
                                 alt={card.alt || "No Image"}
                                 darkMode={darkMode}
                                 initialPrice={card.price}

@@ -3,24 +3,15 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import api from "../utils/api";
-export default function Card(props) {
-  const item = props.item || props;
-  const {
-    id,
-    title,
-    images,
-    image,
-    description,
-    price: initialPrice,
-    quantity: initialQuantity,
-    darkMode,
-    onDelete,
-  } = item;
-  const imgSrc = (Array.isArray(images) && images.length ? images[0] : image) || item.imgSrc || item.imageUrl || "";
-  const alt = title || "product";
-  const categoryLabel = (typeof item.category === "string" && item.category) ||
-                        (item.category && item.category.name) || "Uncategorized";
-
+export default function Card({
+  imgSrc,
+  alt,
+  darkMode,
+  initialPrice,
+  initialQuantity,
+  id, 
+  onDelete
+}) {
   const controls = useAnimation();
   const [isHover, setIsHover] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);

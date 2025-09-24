@@ -1,35 +1,62 @@
+import React, { useState, useEffect } from "react";
 import { motion, useAnimation } from "framer-motion";
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import api from "../utils/api";
+
 export default function Card({
+  id,
   imgSrc,
   alt,
   darkMode,
+
+  // من الـAPI (أو أي سورس خارجي):
+  price: priceProp,
+  quantity: quantityProp,
+
+  // من اللوكال (القيم الابتدائية):
   initialPrice,
   initialQuantity,
-  id, 
-  onDelete
+
+  // كولباك حذف اختياري
+  onDelete,
 }) {
   const controls = useAnimation();
   const [isHover, setIsHover] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [price, setPrice] = useState(initialPrice ?? 100);
-  const [quantity, setQuantity] = useState(initialQuantity ?? 1);
-  const queryClient = useQueryClient();
-const prefetchItem = () => {
-  if (!id) return;
-  queryClient.prefetchQuery({
-    queryKey: ["product", String(id)],
-//    KEY for every product
-    queryFn: async () => {
-      const res = await api.get(`/products/${id}`);
-      return res.data;
-    },
-    staleTime: 1000 * 60 ,
-  });
-};
+
+  // نطبّع القيم الجاية (أولوية: API > initial)
+  const normPriceProp =
+    typeof priceProp === "number" ? priceProp : Number(priceProp ?? initialPrice ?? 0);
+  const normQtyProp =
+    typeof quantityProp === "number" ? quantityProp : Number(quantityProp ?? initialQuantity ?? 1);
+
+  const [price, setPrice] = useState(
+    typeof initialPrice === "number" ? initialPrice : normPriceProp
+  );
+  const [quantity, setQuantity] = useState(
+    typeof initialQuantity === "number" ? initialQuantity : normQtyProp
+  );
+
+  // لو جات داتا من الـAPI بعد الريندر نزامنها مرة
+  useEffect(() => {
+    if (typeof initialPrice !== "number") setPrice(normPriceProp);
+  }, [normPriceProp, initialPrice]);
+
+  useEffect(() => {
+    if (typeof initialQuantity !== "number") setQuantity(normQtyProp);
+  }, [normQtyProp, initialQuantity]);
+
+  // TanStack prefetch لصفحة الـitem
+  const qc = useQueryClient();
+  const prefetchItem = () => {
+    if (!id) return;
+    qc.prefetchQuery({
+      queryKey: ["product", String(id)],
+      queryFn: async () => (await api.get(`/products/${id}`)).data,
+      staleTime: 60_000,
+    });
+  };
 
   const handleHoverStart = () => {
     setIsHover(true);
@@ -50,11 +77,27 @@ const prefetchItem = () => {
   };
 
   const toggleExpand = () => setIsExpanded((prev) => !prev);
-  const increasePrice = () => setPrice((prev) => prev + 1);
-  const decreasePrice = () => setPrice((prev) => (prev > 0 ? prev - 1 : 0));
-  const increaseQuantity = () => setQuantity((prev) => prev + 1);
-  const decreaseQuantity = () =>
+  const increasePrice = (e) => {
+    e?.stopPropagation();
+    setPrice((prev) => prev + 1);
+  };
+  const decreasePrice = (e) => {
+    e?.stopPropagation();
+    setPrice((prev) => (prev > 0 ? prev - 1 : 0));
+  };
+  const increaseQuantity = (e) => {
+    e?.stopPropagation();
+    setQuantity((prev) => prev + 1);
+  };
+  const decreaseQuantity = (e) => {
+    e?.stopPropagation();
     setQuantity((prev) => (prev > 0 ? prev - 1 : 0));
+  };
+
+  const handleDelete = (e) => {
+    e.stopPropagation();
+    onDelete?.(id);
+  };
 
   return (
     <motion.div
@@ -81,9 +124,10 @@ const prefetchItem = () => {
         style={{ perspective: 600 }}
       >
         <img
-          src={imgSrc}
-          alt={alt}
+          src={imgSrc || "https://via.placeholder.com/600x400"}
+          alt={alt || "product"}
           className="w-full h-full object-cover rounded-xl"
+          loading="lazy"
         />
 
         {/* Price & Quantity overlay inside small card */}
@@ -101,13 +145,7 @@ const prefetchItem = () => {
         {/* Sweeping overlay */}
         <motion.div
           className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 pointer-events-none"
-          initial={{
-            top: "-200%",
-            left: "0%",
-            rotate: "40deg",
-            width: "30%",
-            height: "300%",
-          }}
+          initial={{ top: "-200%", left: "0%", rotate: "40deg", width: "30%", height: "300%" }}
           animate={controls}
         />
       </motion.div>
@@ -115,25 +153,27 @@ const prefetchItem = () => {
       {/* <<< EXPANDABLE CONTROLS >>> */}
       <motion.div
         initial={{ height: 0, opacity: 0 }}
-        animate={{
-          height: isExpanded ? "auto" : 0,
-          opacity: isExpanded ? 1 : 0,
-        }}
+        animate={{ height: isExpanded ? "auto" : 0, opacity: isExpanded ? 1 : 0 }}
         transition={{ type: "spring", stiffness: 150, damping: 20 }}
         className="overflow-hidden"
       >
         <div className="p-2 sm:p-4 flex flex-col gap-2 sm:gap-3 text-xs sm:text-sm">
-          <div className="flex justify-between gap-2 w-full flex-col ">
-          <div className="flex justify-between gap-2 w-full flex-col ">
-         
-        
-            <button className="bg-blue-500 text-white px-2 py-1 rounded text-base sm:text-sm md:text-sm md:px-1 md:py-0.5">
-             <Link  onMouseEnter={prefetchItem}  to={`/item/${id}`}> View</Link>
-            </button>
-
-            <button  onClick={() => onDelete?.(id)} className="bg-red-500 text-white px-2 py-1 rounded text-base sm:text-sm md:text-sm md:px-1 md:py-0.5">
+          <div className="flex justify-between gap-2 w-full">
+            <button
+              onClick={handleDelete}
+              className="bg-red-500 text-white px-2 py-1 rounded text-base sm:text-sm md:text-sm md:px-1 md:py-0.5"
+            >
               Delete
             </button>
+
+            <Link
+              to={`/item/${id}`}
+              onMouseEnter={prefetchItem}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-blue-500 text-white px-2 py-1 rounded text-base sm:text-sm md:text-sm md:px-1 md:py-0.5"
+            >
+              View
+            </Link>
           </div>
 
           <div className="flex justify-between items-center gap-2 w-full">
@@ -144,9 +184,7 @@ const prefetchItem = () => {
               >
                 -
               </button>
-              <span className="text-base sm:text-sm md:text-xs">
-                Price: ${price}
-              </span>
+              <span className="text-base sm:text-sm md:text-xs">Price: ${price}</span>
               <button
                 onClick={increasePrice}
                 className="py-1 dark:bg-gray-600 bg-slate-300 rounded text-base sm:text-sm px-[3px] md:py-0.5 md:text-sm"
@@ -164,7 +202,7 @@ const prefetchItem = () => {
               </button>
               <span
                 className={`px-2 py-1 rounded-2xl text-base sm:text-sm md:px-1 md:py-0.5 md:text-xs ${
-                  quantity === 0 ? "bg-red-600" : "bg-green-600"
+                  quantity === 0 ? "bg-red-600 text-white" : "bg-green-600 text-white"
                 }`}
               >
                 Qty: {quantity}

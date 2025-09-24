@@ -19,7 +19,9 @@ export default function Products({ darkMode }) {
   const [maxPrice, setMaxPrice] = useState("");
 
   // reset page when filters change
-  useEffect(() => { setCurrentPage(1); }, [search, source, minPrice, maxPrice]);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, source, minPrice, maxPrice]);
 
   // safe filtering even while API is loading
   const filtered = useMemo(
@@ -35,7 +37,11 @@ export default function Products({ darkMode }) {
   const handleAdd = (product) => setCards((prev) => [product, ...prev]);
   const handleDelete = (id) => {
     setCards((prev) => prev.filter((c) => String(c.id) !== String(id)));
-    if (String(id).startsWith("local-")) { try { removeLocalItem(id); } catch {} }
+    if (String(id).startsWith("local-")) {
+      try {
+        removeLocalItem(id);
+      } catch {}
+    }
   };
 
   return (
@@ -93,7 +99,12 @@ export default function Products({ darkMode }) {
 
         <button
           type="button"
-          onClick={() => { setSearch(""); setSource("all"); setMinPrice(""); setMaxPrice(""); }}
+          onClick={() => {
+            setSearch("");
+            setSource("all");
+            setMinPrice("");
+            setMaxPrice("");
+          }}
           className="ml-auto rounded-2xl px-4 py-2 bg-slate-800 text-white hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600"
         >
           Clear
@@ -104,33 +115,47 @@ export default function Products({ darkMode }) {
       {loading ? (
         <div className="mt-6 text-slate-500">Loading…</div>
       ) : (
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {visibleCards.map((card) => (
-            <Card
-              key={card.id}
-              id={card.id}
-              alt={card.alt}
-              price={card.price}
-              imgSrc={
-                card.img ||
-                card.image ||
-                (Array.isArray(card.images) ? card.images[0] : "") ||
-                card.thumbnail ||
-                "https://via.placeholder.com/300"
-              }
-              onDelete={() => handleDelete(card.id)}
-            />
-          ))}
-        </div>
+      <div className="mt-6 columns-1 sm:columns-2 lg:columns-3 [column-gap:1.5rem]">
+  {visibleCards.map((card) => (
+    <div key={card.id} className="mb-6 break-inside-avoid">
+      <Card
+        id={card.id}
+        alt={card.alt}
+        imgSrc={
+          card.img ||
+          card.image ||
+          (Array.isArray(card.images) ? card.images[0] : "") ||
+          card.thumbnail ||
+          "https://via.placeholder.com/300"
+        }
+        price={card.price ?? card.cost ?? 0}
+        quantity={card.quantity ?? card.qty ?? 1}
+        onDelete={() => handleDelete(card.id)}
+      />
+    </div>
+  ))}
+</div>
       )}
 
       {/* Pagination */}
       <div className="mt-6 flex items-center justify-center gap-2">
-        <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-          className="px-3 py-1 rounded-xl bg-white/60 dark:bg-white/10 disabled:opacity-50">Prev</button>
-        <span className="px-3 py-1">{currentPage} / {totalPages}</span>
-        <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-          className="px-3 py-1 rounded-xl bg-white/60 dark:bg-white/10 disabled:opacity-50">Next</button>
+        <button
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+          className="px-3 py-1 rounded-xl bg-white/60 dark:bg-white/10 disabled:opacity-50"
+        >
+          Prev
+        </button>
+        <span className="px-3 py-1">
+          {currentPage} / {totalPages}
+        </span>
+        <button
+          disabled={currentPage === totalPages}
+          onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+          className="px-3 py-1 rounded-xl bg-white/60 dark:bg-white/10 disabled:opacity-50"
+        >
+          Next
+        </button>
       </div>
     </div>
   );

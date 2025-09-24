@@ -3,6 +3,7 @@ import { useProducts } from "../hooks/useProducts";
 import { useResponsiveCards } from "../hooks/useResponsiveCards";
 import { useState } from "react";
 import AddProductForm from "../components/AddProductForm";
+import { removeLocalItem } from "../lib/localItems";
 
 export default function Products({ darkMode }) {
     const { cards, setCards, loading } = useProducts();
@@ -14,9 +15,13 @@ export default function Products({ darkMode }) {
     const visibleCards = cards?.slice(startIndex, startIndex + cardsPerPage);
 
     const handleAdd = (product) => setCards((prev) => [product, ...prev]);
-    const handleDelete = (id) => setCards((prev) => prev.filter((c) => c.id !== id));
 
-
+const handleDelete = (id) => {
+  setCards(prev => prev.filter(c => String(c.id) !== String(id)));
+  if (String(id).startsWith("local-")) {
+    try { removeLocalItem(id); } catch {}
+  }
+};
 
     return (
         <div className="p-6 space-y-6">

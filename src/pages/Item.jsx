@@ -1,145 +1,195 @@
-// src/pages/Item.jsx
-import { useMemo, useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useMemo, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import api from "../utils/api";
 import { isLocalId, getLocalItemById } from "../lib/localItems";
 
 export default function Item({ darkMode }) {
   const { id } = useParams();
-  const isLocal = isLocalId(id);
-  const localRaw = isLocal ? getLocalItemById(id) : null;
 
-  const viewItem = useMemo(() => {
-    if (!isLocal || !localRaw) return null;
-    const img = localRaw?.image || localRaw?.img || "";
+  // --- Local-first: if id is local-..., read from localStorage and disable API query
+  const __isLocal = isLocalId(id);
+  const __localRaw = __isLocal ? getLocalItemById(id) : null;
+
+  const __viewItem = useMemo(() => {
+    if (!__isLocal || !__localRaw) return null;
+    const img = __localRaw?.image || __localRaw?.img || "";
     return {
-      ...localRaw,
-      images: Array.isArray(localRaw?.images) && localRaw.images.length ? localRaw.images : (img ? [img] : []),
+      ...__localRaw,
+      images: Array.isArray(__localRaw?.images) && __localRaw.images.length ? __localRaw.images : (img ? [img] : []),
       thumbnail: img,
       image: img,
-      category: typeof localRaw?.category === "string" ? { name: localRaw.category } : (localRaw?.category || { name: "Local" }),
-      price: Number(localRaw?.price || 0),
-      description: localRaw?.description || "",
-      alt: localRaw?.title || localRaw?.alt || "Local Item",
-      title: localRaw?.title || localRaw?.alt || "Local Item",
+      category: typeof __localRaw?.category === "string" ? { name: __localRaw.category } : (__localRaw?.category || { name: "Local" }),
+      price: Number(__localRaw?.price || 0),
+      description: __localRaw?.description || "",
+      title: __localRaw?.title || __localRaw?.alt || "Local Item",
     };
-  }, [isLocal, localRaw]);
+  }, [__isLocal, __localRaw]);
 
-  const { data: item, isLoading, isError } = useQuery({
-    enabled: !isLocal,
+  const {
+    data: item,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
     queryKey: ["product", String(id)],
     queryFn: async () => {
       const res = await api.get(`/products/${id}`);
       return res.data;
     },
-    staleTime: 60_000,
-    gcTime: 30 * 60_000,
+    enabled: !__isLocal,        // ⬅️ don't call API for local ids
+    staleTime: 1000 * 60,
+    gcTime: 1000 * 60 * 30,
     retry: 1,
   });
 
-  const images = useMemo(() => {
-    const raw = isLocal ? viewItem?.images : item?.images;
+  // Image list (works for local + API items)
+  const imageList = useMemo(() => {
+    const raw = __isLocal ? __viewItem?.images : (Array.isArray(item?.images) ? item.images : []);
     return Array.isArray(raw) ? raw.map(String).filter(Boolean) : [];
-  }, [isLocal, viewItem, item]);
+  }, [item, __isLocal, __viewItem]);
 
   const [thumbIndex, setThumbIndex] = useState(0);
   useEffect(() => { setThumbIndex(0); }, [id]);
 
   const primaryImage = useMemo(() => {
-    const fallback = isLocal ? (viewItem?.thumbnail || viewItem?.image || "") : (item?.thumbnail || item?.image || "");
-    return images[thumbIndex] || fallback || "";
-  }, [images, thumbIndex, isLocal, item, viewItem]);
+    const fallback = __isLocal
+      ? (__viewItem?.thumbnail || __viewItem?.image || "")
+      : (item?.thumbnail || item?.image || "");
+    return imageList[thumbIndex] || fallback || "";
+  }, [imageList, thumbIndex, item, __isLocal, __viewItem]);
 
-  if (isLoading && !isLocal) {
-    return <div className="mx-auto max-w-6xl p-4 md:p-8">Loading…</div>;
-  }
-
-  if ((isLocal && !viewItem) || (!isLocal && isError)) {
+  // --- Old design branches kept as-is, only swapping `item` with a view object where needed
+  if (isLoading && !__isLocal) {
     return (
       <div className="mx-auto max-w-6xl p-4 md:p-8">
-        <p className="text-red-500">error while loading data</p>
-        <Link to="/products" className="px-4 py-2 rounded-xl bg-slate-800 text-white inline-block mt-3">return to Products</Link>
+        <div className="animate-pulse rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl p-6 md:p-10">
+          <div className="h-8 w-52 bg-slate-200 dark:bg-slate-700 rounded mb-6"></div>
+          <div className="grid gap-6 md:grid-cols-[360px,1fr]">
+            <div className="h-[320px] bg-slate-200 dark:bg-slate-700 rounded-2xl"></div>
+            <div className="space-y-4">
+              <div className="h-6 w-40 bg-slate-200 dark:bg-slate-700 rounded"></div>
+              <div className="h-6 w-24 bg-slate-200 dark:bg-slate-700 rounded"></div>
+              <div className="h-24 w-full bg-slate-200 dark:bg-slate-700 rounded"></div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
-  const v = isLocal ? viewItem : item;
+  if ((!__isLocal && isError) || (__isLocal && !__viewItem)) {
+    return (
+      <div className="mx-auto max-w-3xl p-6 text-center">
+        <p className="mb-4 text-red-600 dark:text-red-400 font-medium">
+          {__isLocal ? "Item not found locally" : `error while loading data: ${String(error?.message || error)}`}
+        </p>
+        <Link
+          to="/products"
+          className="inline-block rounded-lg px-4 py-2 bg-slate-700 text-white hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400"
+        >
+          return to Products
+        </Link>
+      </div>
+    );
+  }
+
+  const view = __isLocal ? __viewItem : item;
 
   return (
     <div className="mx-auto max-w-6xl p-4 md:p-8">
-      {/* Outer card with faint background image */}
-      <div className={`relative rounded-3xl border ${darkMode ? "border-slate-700" : "border-slate-200"} shadow-xl overflow-hidden`}>
-        {/* faint bg image */}
-        {primaryImage && (
-          <div
-            className="absolute inset-0 bg-cover bg-center opacity-10"
-            style={{ backgroundImage: `url(${primaryImage})` }}
+      {/* Outer feature card: border + shadow + background */}
+      <div className="relative overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl">
+        {/* Subtle background image */}
+        {primaryImage ? (
+          <img
+            src={primaryImage}
+            alt={view?.title || "item"}
+            className="pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover opacity-15"
           />
-        )}
+        ) : null}
+        {/* Gradient overlay to improve text contrast */}
+        <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-white/80 via-white/60 to-transparent dark:from-slate-950/80 dark:via-slate-950/60"></div>
 
-        {/* Foreground content */}
-        <div className="relative p-4 md:p-8">
-          {/* Top bar: Title + Category (left), Return button (right) */}
-          <div className="flex items-start justify-between gap-4 mb-6">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold leading-tight">
-                {v?.title || v?.alt}
-              </h1>
-              <div className="mt-2 inline-flex items-center rounded-full px-3 py-1 text-sm bg-white/70 dark:bg-white/10 border border-white/50 dark:border-white/10">
-                {v?.category?.name}
-              </div>
+        <div className="p-6 md:p-10">
+          {/* Header */}
+          <div className="mb-6 flex flex-wrap items-center gap-3">
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+              {view?.title || "Untitled"}
+            </h1>
+
+            {view?.category?.name ? (
+              <span className="rounded-full border border-slate-300 dark:border-slate-700 px-3 py-1 text-xs font-medium">
+                {view.category.name}
+              </span>
+            ) : null}
+
+            <div className="ms-auto">
+              <Link
+                to="/products"
+                className="inline-block rounded-full px-4 py-2 text-sm bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700"
+              >
+                Return to Products
+              </Link>
             </div>
-
-            <Link
-              to="/products"
-              className="h-10 px-4 inline-flex items-center rounded-full bg-white/70 dark:bg-white/10 hover:bg-white/90 dark:hover:bg-white/20 border border-white/50 dark:border-white/10 transition shadow-sm"
-            >
-              Return to Products
-            </Link>
           </div>
 
-          {/* Main grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Main image with white border */}
-            <div className="relative rounded-[28px] bg-white/90 p-2 md:p-3">
-              <div className="rounded-[20px] overflow-hidden">
-                { (images[thumbIndex] || v?.image) ? (
-                  <img
-                    src={images[thumbIndex] || v.image}
-                    alt={v?.alt || v?.title || "image"}
-                    className="w-full h-auto object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-64 bg-slate-200 dark:bg-slate-800" />
-                )}
-              </div>
+          {/* Card body */}
+          <div className="grid gap-8 md:grid-cols-[360px,1fr]">
+            {/* Image box */}
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 p-4 backdrop-blur-sm">
+              {primaryImage ? (
+                <img
+                  src={primaryImage}
+                  alt={view?.title || "product image"}
+                  className="mx-auto aspect-square w-full max-w-[320px] rounded-xl object-cover"
+                />
+              ) : (
+                <div className="aspect-square w-full max-w-[320px] rounded-xl bg-slate-100 dark:bg-slate-800 grid place-items-center text-slate-500">
+                  no image
+                </div>
+              )}
             </div>
 
             {/* Details */}
             <div className="space-y-4">
-              <div className="text-2xl font-semibold">
-                ${Number(v?.price || 0).toFixed(2)}
-              </div>
+              {/* Price */}
+              {typeof view?.price === "number" ? (
+                <div className="text-xl md:text-2xl font-semibold">
+                  ${Number(view.price).toFixed(2)}
+                </div>
+              ) : null}
 
-              {v?.description ? (
-                <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
-                  {v.description}
+              {/* Description */}
+              {view?.description ? (
+                <p className="leading-7 text-slate-700 dark:text-slate-300">
+                  {view.description}
                 </p>
               ) : (
-                <p className="text-slate-500 dark:text-slate-400">no available description</p>
+                <p className="text-slate-500 dark:text-slate-400">
+                  no available description
+                </p>
               )}
 
-              {images.length > 1 && (
-                <div className="mt-2 grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
-                  {images.map((src, idx) => (
+              {imageList.length > 1 && (
+                <div className="mt-4 grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
+                  {imageList.map((src, idx) => (
                     <button
-                      key={`${src}-${idx}`}
+                      key={idx}
+                      type="button"
                       onClick={() => setThumbIndex(idx)}
-                      className={`relative rounded-xl overflow-hidden border ${idx === thumbIndex ? "border-violet-500" : "border-transparent"}`}
-                      title={`thumbnail ${idx + 1}`}
+                      className={`relative aspect-square rounded-lg overflow-hidden border ${
+                        thumbIndex === idx
+                          ? "border-violet-500 ring-2 ring-violet-300"
+                          : "border-slate-200 dark:border-slate-800"
+                      } focus:outline-none`}
                     >
-                      <img src={src} alt={`thumbnail ${idx + 1}`} loading="lazy" className="w-full h-16 object-cover" />
+                      <img
+                        src={src}
+                        alt={`thumbnail ${idx + 1}`}
+                        loading="lazy"
+                        className="h-full w-full object-cover"
+                      />
                     </button>
                   ))}
                 </div>

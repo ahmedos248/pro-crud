@@ -123,11 +123,9 @@ const prefetchItem = () => {
         className="overflow-hidden"
       >
         <div className="p-2 sm:p-4 flex flex-col gap-2 sm:gap-3 text-xs sm:text-sm">
-          <div className="flex justify-between gap-2 w-full">
+          <div className="flex justify-between gap-2 w-full flex-col ">
          
-            <button className="bg-green-500 text-white px-2 py-1 rounded text-base sm:text-sm md:text-sm md:px-1 md:py-0.5">
-              add
-            </button>
+        
             <button className="bg-blue-500 text-white px-2 py-1 rounded text-base sm:text-sm md:text-sm md:px-1 md:py-0.5">
              <Link  onMouseEnter={prefetchItem}  to={`/item/${id}`}> View</Link>
             </button>

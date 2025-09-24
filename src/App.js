@@ -6,7 +6,6 @@ import { colorPalette } from "./utils/colorPalette";
 import Products from "./pages/Products";
 import Item from "./pages/Item"; 
 import BackgroundTexture from "./ui/BackgroundTexture";
-import { Toaster } from "react-hot-toast"; // global toast container
 
 export default function App() {
   const [darkMode, setDarkMode] = useState(false);
@@ -22,8 +21,6 @@ export default function App() {
 
   return (
     <div className="relative min-h-screen">
-        <Toaster position="top-center\" />
-   -
       {/* Gradient background (custom colorPalette) */}
       <div
         className={`absolute inset-0 -z-20 transition-colors duration-500 

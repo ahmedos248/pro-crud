@@ -4,8 +4,9 @@ import Home from "./pages/Home";
 import Navbar from "./components/Navbar";
 import { colorPalette } from "./utils/colorPalette";
 import Products from "./pages/Products";
-import Item from "./pages/Item"; 
 import BackgroundTexture from "./ui/BackgroundTexture";
+import LearnMore from "./pages/LearnMore";
+import Item from "./pages/Item";
 
 export default function App() {
   const [darkMode, setDarkMode] = useState(false);
@@ -41,8 +42,9 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/products" element={<Products darkMode={darkMode} />} />
-            <Route path="/item/:id" element={<Item darkMode={darkMode} />} />
-
+            <Route path="/learn-more" element={<LearnMore />} />
+            <Route path="/item/:id" element={<Item />} />
+            <Route path="*" element={<div>404 Not Found</div>} />
           </Routes>
         </main>
       </div>
